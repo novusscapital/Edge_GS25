@@ -4,6 +4,7 @@ from datetime import datetime
 
 from dash import Dash, html, dcc
 from dash.dependencies import Output, Input
+import plotly.graph_objs as go
 
 # ==========================
 # CONFIGURAÇÕES GERAIS
@@ -27,6 +28,15 @@ THRESHOLDS = {
     "humidity": {"min": 40.0, "max": 60.0},      # %
     "luminosity": {"min": 30.0, "max": 80.0},    # 0–100
 }
+
+PARAM_LABELS = {
+    "temperature": "Temperatura (°C)",
+    "humidity": "Umidade (%)",
+    "luminosity": "Luminosidade (0–100)",
+}
+
+# Histórico em memória (para demo)
+SENSOR_HISTORY = []  # cada item: {"timestamp": datetime, "temperature": ..., "humidity": ..., "luminosity": ...}
 
 
 # ==========================
@@ -179,7 +189,6 @@ app.layout = html.Div(
                     },
                 ),
 
-                # link “fake” pro SkillHub
                 html.Div(
                     style={"textAlign": "center", "marginTop": "12px"},
                     children=[
@@ -215,6 +224,46 @@ app.layout = html.Div(
                     ],
                 ),
 
+                # Filtro + gráfico de histórico
+                html.Div(
+                    style={"marginTop": "32px"},
+                    children=[
+                        html.Div(
+                            style={
+                                "display": "flex",
+                                "justifyContent": "space-between",
+                                "alignItems": "center",
+                                "marginBottom": "8px",
+                            },
+                            children=[
+                                html.H4(
+                                    "Histórico de medições",
+                                    style={"margin": 0},
+                                ),
+                                dcc.Dropdown(
+                                    id="param-selector",
+                                    options=[
+                                        {"label": "Luminosidade", "value": "luminosity"},
+                                        {"label": "Temperatura", "value": "temperature"},
+                                        {"label": "Umidade", "value": "humidity"},
+                                    ],
+                                    value="luminosity",
+                                    clearable=False,
+                                    style={
+                                        "width": "220px",
+                                        "color": "#000000",
+                                    },
+                                ),
+                            ],
+                        ),
+                        dcc.Graph(
+                            id="history-graph",
+                            config={"displayModeBar": False},
+                            style={"height": "320px"},
+                        ),
+                    ],
+                ),
+
                 # Parâmetros fora do ideal
                 html.Div(
                     id="out-of-range-text",
@@ -237,7 +286,6 @@ app.layout = html.Div(
                     },
                 ),
 
-                # Intervalo de atualização
                 dcc.Interval(
                     id="interval-component",
                     interval=5 * 1000,  # 5 segundos
@@ -262,16 +310,36 @@ app.layout = html.Div(
         Output("lum-box", "children"),
         Output("out-of-range-text", "children"),
         Output("last-update", "children"),
+        Output("history-graph", "figure"),
     ],
-    Input("interval-component", "n_intervals"),
+    [
+        Input("interval-component", "n_intervals"),
+        Input("param-selector", "value"),
+    ],
 )
-def update_dashboard(n):
+def update_dashboard(n, selected_param):
+    global SENSOR_HISTORY
+
     values = fetch_sensor_data()
     status_text, color_key, out_of_range = evaluate_room_condition(values)
 
     status_style = BASE_STATUS_STYLE.copy()
     status_style["backgroundColor"] = COLOR_MAP.get(color_key, "#333333")
 
+    # --- Atualiza histórico em memória ---
+    if values is not None:
+        SENSOR_HISTORY.append(
+            {
+                "timestamp": datetime.now(),
+                "temperature": values["temperature"],
+                "humidity": values["humidity"],
+                "luminosity": values["luminosity"],
+            }
+        )
+        # limita para não crescer infinito (ex.: últimas 200 amostras)
+        SENSOR_HISTORY = SENSOR_HISTORY[-200:]
+
+    # --- Monta textos dos cards ---
     if values is None:
         temp_children = [
             html.H5("Temperatura", style={"marginBottom": "8px", "color": "#AAAAAA"}),
@@ -324,17 +392,77 @@ def update_dashboard(n):
         if len(out_of_range) == 0:
             out_text = "Todos os parâmetros estão dentro da faixa ideal."
         else:
-            labels = {
+            labels_pt = {
                 "temperature": "Temperatura",
                 "humidity": "Umidade",
                 "luminosity": "Luminosidade",
             }
-            nomes = [labels[k] for k in out_of_range]
+            nomes = [labels_pt[k] for k in out_of_range]
             out_text = "Parâmetros fora do ideal: " + ", ".join(nomes) + "."
 
     last_update = (
         "Última atualização: "
         + datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    )
+
+    # --- Monta o gráfico de histórico ---
+    times = [item["timestamp"] for item in SENSOR_HISTORY]
+    ys = [item[selected_param] for item in SENSOR_HISTORY] if SENSOR_HISTORY else []
+
+    th = THRESHOLDS[selected_param]
+    min_line = [th["min"]] * len(times)
+    max_line = [th["max"]] * len(times)
+
+    fig = go.Figure()
+
+    if times:
+        fig.add_trace(
+            go.Scatter(
+                x=times,
+                y=ys,
+                mode="lines+markers",
+                name="Valor medido",
+                line=dict(width=2),
+            )
+        )
+        # linhas tracejadas de limite
+        fig.add_trace(
+            go.Scatter(
+                x=times,
+                y=min_line,
+                mode="lines",
+                name="Mínimo ideal",
+                line=dict(dash="dash", width=1.5),
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=times,
+                y=max_line,
+                mode="lines",
+                name="Máximo ideal",
+                line=dict(dash="dash", width=1.5),
+            )
+        )
+
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=10, b=40),
+        paper_bgcolor="#121212",
+        plot_bgcolor="#1E1E1E",
+        font=dict(color="#FFFFFF"),
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(
+            title=PARAM_LABELS[selected_param],
+            zeroline=False,
+            gridcolor="rgba(255,255,255,0.08)",
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+        ),
     )
 
     return (
@@ -345,6 +473,7 @@ def update_dashboard(n):
         lum_children,
         out_text,
         last_update,
+        fig,
     )
 
 
