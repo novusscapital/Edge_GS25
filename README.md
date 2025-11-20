@@ -18,7 +18,7 @@ Ele integra:
 O objetivo é oferecer uma solução moderna, acessível e inteligente para monitoramento de ambientes, aplicando conceitos de IoT, cloud computing, protocolos Ultralight, Context Broker e visualização profissional de dados.
 
 ## Arquitetura Geral do Sistema
-
+```
 +-------------------+         UL (HTTP)       +-----------------+
 |      ESP32        |  -------------------->  |   IoT-Agent     |
 | DHT22 + LDR (Wokwi)|                         |   Ultralight    |
@@ -46,7 +46,7 @@ O objetivo é oferecer uma solução moderna, acessível e inteligente para moni
                                         +--------------------------------------+
                                         |     Widget SkillHub (Frontend)      |
                                         +--------------------------------------+
-
+```
 ## Funcionalidades Principais
 
 - Coleta de dados ambientais
