@@ -184,6 +184,9 @@ Este projeto também funciona como um Widget IoT do SkillHub, possibilitando:
 - Expansão futura para outros sensores
 
 ## Vídeo de Demonstração
+(SkillHub Comfort Monitor - Youtube)[https://youtu.be/bYOBxKSQ-5E]
+(Skill Hub Comfort Monitor - Wowki)[https://wokwi.com/projects/448084989566067713]
+
 
 O vídeo inclui:
 - Arquitetura do sistema
