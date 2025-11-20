@@ -1,0 +1,476 @@
+{
+	"info": {
+		"_postman_id": "4802b8bc-2d32-41c7-bfd7-775d5bbfb74e",
+		"name": "SkillHub Comfort Monitor",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48926615",
+		"_collection_link": "https://rm562140-9764866.postman.co/workspace/GS_25~43376f34-2b1c-45b3-9c61-14b1dd1faa15/collection/48926615-4802b8bc-2d32-41c7-bfd7-775d5bbfb74e?action=share&source=collection_link&creator=48926615"
+	},
+	"item": [
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "IoT Agent - Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{url}}:4041/iot/about",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"about"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orion - Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{url}}:1026/version",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "1026",
+							"path": [
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "STH-Comet - Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{url}}:8666/version",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "8666",
+							"path": [
+								"version"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Service Groups (IoT Agent)",
+			"item": [
+				{
+					"name": "Create Service Group (EnvSensor)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"services\": [\n    {\n      \"apikey\": \"{{apikey}}\",\n      \"cbroker\": \"http://{{url}}:1026\",\n      \"entity_type\": \"EnvSensor\",\n      \"resource\": \"/iot/d\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://{{url}}:4041/iot/services",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"services"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Service Groups (IoT Agent)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:4041/iot/services",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"services"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Service Group (EnvSensor)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:4041/iot/services?resource=/iot/json&apikey={{apikey}}",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"services"
+							],
+							"query": [
+								{
+									"key": "resource",
+									"value": "/iot/json"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Devices (IoT Agent)",
+			"item": [
+				{
+					"name": "Register Comfort Device (EnvSensor)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"devices\": [\n    {\n      \"device_id\": \"{{device_id}}\",\n      \"entity_name\": \"EnvSensor:{{device_id}}\",\n      \"entity_type\": \"EnvSensor\",\n      \"protocol\": \"PDI-IoTA-UltraLight\",\n      \"transport\": \"HTTP\",\n      \"apikey\": \"{{apikey}}\",\n      \"attributes\": [\n        { \"object_id\": \"t\", \"name\": \"temperature\", \"type\": \"Float\" },\n        { \"object_id\": \"h\", \"name\": \"humidity\", \"type\": \"Float\" },\n        { \"object_id\": \"l\", \"name\": \"luminosity\", \"type\": \"Float\" }\n      ],\n      \"static_attributes\": [\n        { \"name\": \"room\", \"type\": \"Text\", \"value\": \"HomeOffice\" },\n        { \"name\": \"deviceRole\", \"type\": \"Text\", \"value\": \"ComfortMonitor\" }\n      ]\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://{{url}}:4041/iot/devices",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"devices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Devices (IoT Agent)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:4041/iot/devices",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"devices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comfort Device (EnvSensor)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:4041/iot/devices/{{device_id}}",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"devices",
+								"{{device_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Measurements (Ultralight HTTP)",
+			"item": [
+				{
+					"name": "Send Comfort Metrics (Simulado)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/plain"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "{{fiwareService}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{fiwareServicePath}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "t|24.5|h|52.3|l|320"
+						},
+						"url": {
+							"raw": "http://{{url}}:7896/iot/d?i={{device_id}}&k={{apikey}}",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "7896",
+							"path": [
+								"iot",
+								"d"
+							],
+							"query": [
+								{
+									"key": "i",
+									"value": "{{device_id}}"
+								},
+								{
+									"key": "k",
+									"value": "{{apikey}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Context & History",
+			"item": [
+				{
+					"name": "Get Comfort Device Context (Orion)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:1026/v2/entities/EnvSensor:{{device_id}}",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "1026",
+							"path": [
+								"v2",
+								"entities",
+								"EnvSensor:{{device_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List EnvSensor Entities (Orion)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:1026/v2/entities?type=EnvSensor",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "1026",
+							"path": [
+								"v2",
+								"entities"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "EnvSensor"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Temperature History (STH-Comet)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "{{service}}"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "{{servicepath}}"
+							}
+						],
+						"url": {
+							"raw": "http://{{url}}:8666/STH/v1/contextEntities/type/EnvSensor/id/EnvSensor:{{device_id}}/attributes/temperature?hLimit=20&hOffset=0",
+							"protocol": "http",
+							"host": [
+								"{{url}}"
+							],
+							"port": "8666",
+							"path": [
+								"STH",
+								"v1",
+								"contextEntities",
+								"type",
+								"EnvSensor",
+								"id",
+								"EnvSensor:{{device_id}}",
+								"attributes",
+								"temperature"
+							],
+							"query": [
+								{
+									"key": "hLimit",
+									"value": "20"
+								},
+								{
+									"key": "hOffset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "20.63.91.180"
+		},
+		{
+			"key": "apikey",
+			"value": "comfortkey"
+		},
+		{
+			"key": "device_id",
+			"value": "comfort001"
+		},
+		{
+			"key": "service",
+			"value": "skillhub"
+		},
+		{
+			"key": "servicepath",
+			"value": "/"
+		}
+	]
+}
